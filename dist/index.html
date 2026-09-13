@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="寻花令上下句检索，按两句的字数、位置和整副重复字反馈，筛选去重后的候选诗句。">
+  <meta name="color-scheme" content="light">
+  <title>寻花令 · 诗词检索</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231e3447'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-size='43' fill='white' font-family='serif'%3E寻%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="data/manifest.js"></script>
+  <script defer src="vendor/opencc.js"></script>
+  <script defer src="engine.js"></script>
+  <script defer src="dynasties.js"></script>
+  <script defer src="search.js"></script>
+  <script defer src="couplets.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><span class="seal" aria-hidden="true">寻</span><div><h1>寻花令<span>诗词检索</span></h1><p>以字为引，循句寻诗。</p></div></div>
+    <button class="quiet" id="about-button">诗词库与使用说明 <span aria-hidden="true">↗</span></button>
+  </header>
+  <main class="workspace">
+    <aside class="filter-panel" aria-label="筛选条件">
+      <div class="panel-heading"><h2>筛选条件</h2><button class="text-button" id="reset-button">清空条件</button></div>
+      <p class="muted compact">设置好条件后，点击“开始检索”。</p>
+      <form id="filter-form" novalidate>
+        <section class="filter-section first">
+          <h3><span class="step">01</span> 上下句字数</h3>
+          <div class="length-options" role="group" aria-label="诗句字数">
+            <button type="button" data-length="5" class="selected" aria-pressed="true">五言 <small>各 5 字</small></button>
+            <button type="button" data-length="7" aria-pressed="false">七言 <small>各 7 字</small></button>
+            <button type="button" data-length="0" aria-pressed="false">不限</button>
+            <button type="button" data-length="custom" aria-pressed="false">自定义</button>
+          </div>
+          <div id="custom-length-wrap" class="custom-pair" hidden><label>上句 <input id="upper-length" type="number" min="1" max="40" value="5"></label><label>下句 <input id="lower-length" type="number" min="1" max="40" value="5"></label></div>
+          <p class="field-hint length-hint">五言为上句 5 字、下句 5 字；标点不计字数。</p>
+          <div class="pairing-option"><label for="pairing-mode">上下句配对</label><select id="pairing-mode" aria-describedby="pairing-hint"><option value="strict">严格配对（默认）</option><option value="adjacent">所有相邻句（宽松）</option></select></div>
+          <p class="field-hint" id="pairing-hint">依据原文段落、句末与诗行结构配对，减少跨联拼接。找不到时可试宽松模式。</p>
+        </section>
+        <section class="filter-section dynasty-section">
+          <div class="dynasty-heading"><h3>朝代 <span class="label-note">可多选</span></h3><button type="button" id="dynasty-all" class="text-button" aria-pressed="true">不限朝代</button></div>
+          <div id="dynasty-options" class="dynasty-options" role="group" aria-label="选择朝代，可多选"></div>
+          <p class="field-hint dynasty-hint">不选即不限；过渡时期归入相关朝代，如“明末清初”可从明、清两项找到。</p>
+        </section>
+        <section class="filter-section">
+          <h3><span class="step">02</span> 已知的字</h3>
+          <label for="required-chars">整副必须包含 <span class="label-note">上下两句合计</span></label>
+          <input id="required-chars" placeholder="例如：月 山" autocomplete="off" spellcheck="false">
+          <p class="field-hint">可连续输入多个字；重复输入表示至少出现该次数。</p>
+          <label for="excluded-chars">整副不能包含 <span class="label-note">两句都不能有</span></label>
+          <input id="excluded-chars" placeholder="例如：风 雨 雪" autocomplete="off" spellcheck="false">
+          <details class="scope-details"><summary>分别限定上句 / 下句的字</summary><div class="scope-fields"><label>上句必须包含<input id="upper-required" placeholder="例如：月月" autocomplete="off"></label><label>下句必须包含<input id="lower-required" placeholder="例如：山" autocomplete="off"></label><label>上句不能包含<input id="upper-excluded" placeholder="要从上句排除的字" autocomplete="off"></label><label>下句不能包含<input id="lower-excluded" placeholder="要从下句排除的字" autocomplete="off"></label></div></details>
+        </section>
+        <section class="filter-section">
+          <h3><span class="step correct-dot">03</span> 字与位置都确定</h3>
+          <p class="field-hint">选择上句或下句；每句位置均从 1 开始。</p>
+          <div id="exact-rules" class="rule-list"></div>
+          <button type="button" id="add-exact" class="add-button">＋ 添加定位条件</button>
+        </section>
+        <section class="filter-section">
+          <h3><span class="step present-dot">04</span> 有这个字，但不在这些位置</h3>
+          <p class="field-hint">字须在整副出现；禁止位置只作用于所选句，字也可在另一句。</p>
+          <div id="misplaced-rules" class="rule-list"></div>
+          <button type="button" id="add-misplaced" class="add-button">＋ 添加排位条件</button>
+        </section>
+      </form>
+      <div class="filter-footer"><span class="local-icon" aria-hidden="true">◇</span> 浏览器内检索 · 支持离线使用</div>
+    </aside>
+    <div class="results-panel">
+      <section class="feedback-panel">
+        <details id="feedback-details">
+          <summary><div><span class="eyebrow">从游戏继续</span><h2>录入一轮寻花令反馈</h2></div><span class="summary-plus" aria-hidden="true">＋</span></summary>
+          <div class="feedback-content">
+            <p class="muted">输入猜过的上下句，再点字设置反馈。字是否存在和重复次数按整副判断，绿色位置按各句判断。</p>
+            <form id="guess-form" class="guess-form"><div class="guess-inputs"><label>猜过的上句<input id="guess-upper" placeholder="例如：床前明月光" autocomplete="off"></label><label>猜过的下句<input id="guess-lower" placeholder="例如：疑是地上霜" autocomplete="off"></label></div><button class="primary" type="submit">添加一轮</button></form>
+            <div class="feedback-legend"><span><i class="correct"></i> 字与位置正确</span><span><i class="present"></i> 有字但错位</span><span><i class="absent"></i> 不存在 / 次数已用完</span></div>
+            <div id="guess-rounds"></div>
+            <label class="duplicate-option" for="duplicate-mode">重复字规则 <select id="duplicate-mode"><option value="wordle">Wordle：按出现次数分配反馈</option><option value="presence">逐字判断：只看是否存在</option></select></label>
+          </div>
+        </details>
+      </section>
+      <section class="candidate-section" aria-labelledby="results-heading">
+        <div class="results-heading"><div><span class="eyebrow">循字觅诗</span><h2 id="results-heading">候选上下句 <span id="result-count">—</span></h2></div><div class="search-actions"><button id="example-button" class="example-button">填入「明月」示例</button><button id="search-button" class="primary" type="submit" form="filter-form">开始检索</button></div></div>
+        <div class="results-meta"><p id="results-description" aria-live="polite">先设置条件，再开始检索。</p><label for="script-mode" class="script-label">文字 <select id="script-mode"><option value="simplified">简体匹配</option><option value="original">原文匹配</option></select></label></div>
+        <div id="active-filters" class="active-filters" aria-label="当前条件"></div>
+        <div id="notice" role="status" hidden></div>
+        <div class="result-table"><div class="table-heading"><span>上句 / 下句</span><span>作者 / 出处</span><span>操作</span></div><div id="results"></div></div>
+        <div class="pagination" id="pagination" hidden><p id="page-info"></p><div><button id="prev-page" class="quiet">上一页</button><button id="next-page" class="quiet">下一页</button></div></div>
+        <p class="corpus-note" id="corpus-note">古籍用字与版本可能有差异；简体匹配会统一常用繁简字。</p>
+      </section>
+    </div>
+  </main>
+  <footer class="site-footer"><span>寻花令 <span class="footer-divider">/</span> 诗词检索</span><span id="footer-stats">本地诗词库</span></footer>
+  <dialog id="about-dialog"><div class="dialog-heading"><h2>诗词库与使用说明</h2><button class="icon-button" data-close-dialog aria-label="关闭说明">×</button></div><div id="about-content"></div></dialog>
+  <dialog id="poem-dialog"><div class="dialog-heading"><h2 id="poem-title"></h2><button class="icon-button" data-close-dialog aria-label="关闭诗词全文">×</button></div><div id="poem-content"></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <noscript>请启用浏览器 JavaScript 后使用本地诗词检索。</noscript>
+</body>
+</html>

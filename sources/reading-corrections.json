@@ -1,0 +1,212 @@
+[
+  {
+    "title": "江南",
+    "author": "两汉乐府",
+    "contentSha256": "62895361a2577675c9eedceecbe423d349082cb23e9e89bc514392fca8094d43",
+    "paragraphs": [
+      "江南可采莲，莲叶何田田。",
+      "鱼戏莲叶间，鱼戏莲叶东，鱼戏莲叶西，鱼戏莲叶南，鱼戏莲叶北。"
+    ],
+    "referenceUrl": "https://zh.wikisource.org/wiki/樂府詩集/026卷",
+    "note": "对照《乐府诗集》核对分句，保留原库用字；鱼戏五句在严格模式保守处理，可切换宽松补查。"
+  },
+  {
+    "title": "上邪",
+    "author": "两汉乐府",
+    "contentSha256": "3d58a66352fe39e48ca78f28c68b8704241fb63dfde510ff5989c4a2313594d1",
+    "paragraphs": [
+      "上邪。",
+      "我欲与君相知，长命无绝衰。",
+      "山无陵，江水为竭。",
+      "冬雷震震，夏雨雪。",
+      "天地合，乃敢与君绝。"
+    ],
+    "referenceUrl": "https://zh.wikisource.org/w/index.php?title=上邪&oldid=5978349",
+    "note": "对照古辞整理句内停顿与呼告；只调整标点，不改变原库用字。"
+  },
+  {
+    "title": "敕勒歌",
+    "author": "无名氏",
+    "contentSha256": "0a5e7be439b9416e6079e05e953c5666ee12f31c2664d79a286b7acfbd106a5d",
+    "paragraphs": [
+      "敕勒川，阴山下。",
+      "天似穹庐，笼盖四野。",
+      "天苍苍，野茫茫，风吹草低见牛羊。"
+    ],
+    "dynasty": "南北朝",
+    "referenceUrl": "https://zh.wikisource.org/w/index.php?title=敕勒歌&oldid=8732963",
+    "note": "对照北朝乐府原作核对分句，朝代从原库的“隋”校正为“南北朝”；保留原库用字。"
+  },
+  {
+    "title": "孔雀东南飞 古诗为焦仲卿妻作",
+    "author": "两汉乐府",
+    "contentSha256": "24dad5ea365d22d5348b84271ed14e98f46cbd4679e39b6c2a90522ef97a827f",
+    "singleGroups": {
+      "68": "誓天不相负",
+      "83": "阿母大悲摧",
+      "92": "阿母白媒人",
+      "102": "阿母谢媒人",
+      "115": "还部白府君",
+      "118": "视历复开书",
+      "121": "卿可去成婚",
+      "129": "阿母谓阿女",
+      "133": "泪落便如泻",
+      "158": "今日大风寒",
+      "168": "府吏再拜还"
+    },
+    "referenceUrl": "https://zh.wikisource.org/w/index.php?title=古詩為焦仲卿妻作&oldid=2522605",
+    "note": "对照原作分行整理357个五字句：保留11处独句，恢复173副上下句；只调整标点与分行，保留原库用字。"
+  },
+  {
+    "title": "古诗十九首 其十七",
+    "author": "无名氏",
+    "contentSha256": "fed4c6c86a841e41221b9e03b08bf53905c7a4f9d9e0eddb29f3f4e993995d2d",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其十一",
+    "author": "无名氏",
+    "contentSha256": "70a57a5924188f88a04744f26374016695751b0f3a5790b4e119096657d32234",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其十三",
+    "author": "无名氏",
+    "contentSha256": "d2897e52369c78cb7d103868e47b55d9cf7459f92726edd5e3825385f7afda06",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其八",
+    "author": "无名氏",
+    "contentSha256": "a069e3e1db99fe8e4c82d9723edc9ed8dcfb600d89f17042336021aa310f829a",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其七",
+    "author": "无名氏",
+    "contentSha256": "b3ecf5f9f19e151239b66b3078fd40090e8fe55c760c85ffae680f13492cd3c9",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其六",
+    "author": "无名氏",
+    "contentSha256": "f80520969e14c8dbdbc173b6be6322961fb22128135ebc0ed0ec289c1a9d9670",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其十二",
+    "author": "无名氏",
+    "contentSha256": "a0857c24826200b83c89e18b44d2ea7f65c53c2868363d044e5563db6c0372f7",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其三",
+    "author": "无名氏",
+    "contentSha256": "fcddb9957c49f2c1de297bb2c2a025ed96dab7d69076efbd5e7dda72b29a5ea8",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其四",
+    "author": "无名氏",
+    "contentSha256": "042dc2867a9feba042bf7ff525e6abeb346bf17e2c7f7d306da739d91be17f91",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其十",
+    "author": "无名氏",
+    "contentSha256": "d1c3bfe76f268e990bd9fbb810471d96f4a71c4fe05c31b6cdef2deb45d715d3",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其十四",
+    "author": "无名氏",
+    "contentSha256": "64490d752e8c2431d25ef038bee6a63ee74075843bfa200c1bc0a55d65bcddcf",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其五",
+    "author": "无名氏",
+    "contentSha256": "b1dba33ff8308ac2f4f34dc45b71b561b93ad091601041cfb7447ddc16c8ef55",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其十八",
+    "author": "无名氏",
+    "contentSha256": "9ab770ca4469f6b0fe6b10639db7ee3657381aad87013754e4bd692cf119c405",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其九",
+    "author": "无名氏",
+    "contentSha256": "4f2aa86f7f73f5d18895ac8c5c60cc8072a09bb470b73cbf32df18ef3aa8305b",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其十五",
+    "author": "无名氏",
+    "contentSha256": "244c8d5255bebb0d1866960086c883e957d730fbc9cafb617ffd0997bcae8288",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其十六",
+    "author": "无名氏",
+    "contentSha256": "6f4a0413d8d0be37b4c1262218786977c1c7157b7c8f6345da4532f6c289fa8a",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其十九",
+    "author": "无名氏",
+    "contentSha256": "56ebd8e1f3ecb28a2f5c1f1bad8edc9f8d366b9c504e1b386df37c8be8a3a4df",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其二",
+    "author": "无名氏",
+    "contentSha256": "c3bfab6cde1e90cfd7c57d328ff21836075286922e27d6decc0cddef6d7ad6d0",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  },
+  {
+    "title": "古诗十九首 其一",
+    "author": "无名氏",
+    "contentSha256": "739fe69391ba06c7062388b3fb4cf4bc0ffc890d40edfc1b622cf0de6662c4ab",
+    "dynasty": "汉",
+    "referenceUrl": "https://www.nopss.gov.cn/n1/2024/0718/c373410-40280279.html",
+    "note": "《古诗十九首》按通常断代归入汉代；原库朝代标签为“魏晋”。正文用字与分句保留。"
+  }
+]

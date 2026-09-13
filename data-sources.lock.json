@@ -1,0 +1,25 @@
+{
+  "sources": [
+    {
+      "id": "chinese-poetry",
+      "name": "chinese-poetry",
+      "repository": "https://github.com/chinese-poetry/chinese-poetry",
+      "commit": "b8594f81a89752241442f2ce267d6f66f96704ee",
+      "archiveUrl": "https://codeload.github.com/chinese-poetry/chinese-poetry/tar.gz/b8594f81a89752241442f2ce267d6f66f96704ee",
+      "archiveFile": "chinese-poetry.tar.gz",
+      "observedArchiveSha256": "94bb88eec209090661270649f25793b3ad79fc07135182099306c9a979d8e102",
+      "license": "MIT"
+    },
+    {
+      "id": "werneror-poetry",
+      "name": "Werneror/Poetry",
+      "repository": "https://github.com/Werneror/Poetry",
+      "commit": "4cfe49c06858e00d15f84d192fe5294295f79689",
+      "archiveUrl": "https://codeload.github.com/Werneror/Poetry/tar.gz/4cfe49c06858e00d15f84d192fe5294295f79689",
+      "archiveFile": "werneror-poetry.tar.gz",
+      "observedArchiveSha256": "5f83aea1fd1ddda885780d6c3f58d11fe348ef5daa9c0ffaefeea7f6aee4071b",
+      "license": "MIT",
+      "includedDynasties": ["先秦", "秦", "汉", "魏晋", "魏晋末南北朝初", "南北朝", "隋", "隋末唐初", "唐末宋初", "辽", "宋末金初", "金", "宋末元初", "金末元初", "元", "元末明初", "明", "明末清初", "清"]
+    }
+  ]
+}
