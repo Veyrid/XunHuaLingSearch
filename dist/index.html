@@ -86,7 +86,17 @@
         <div id="active-filters" class="active-filters" aria-label="当前条件"></div>
         <div id="notice" role="status" hidden></div>
         <div class="result-table"><div class="table-heading"><span>上句 / 下句</span><span>作者 / 出处</span><span>操作</span></div><div id="results"></div></div>
-        <div class="pagination" id="pagination" hidden><p id="page-info"></p><div><button id="prev-page" class="quiet">上一页</button><button id="next-page" class="quiet">下一页</button></div></div>
+        <div class="pagination" id="pagination" hidden>
+          <p id="page-info" aria-live="polite"></p>
+          <div class="pagination-controls">
+            <button id="prev-page" class="quiet" type="button">上一页</button>
+            <button id="next-page" class="quiet" type="button">下一页</button>
+            <form id="page-jump-form" class="page-jump" novalidate>
+              <label for="page-number">跳至</label><input id="page-number" type="number" min="1" step="1" inputmode="numeric" aria-label="跳转页码" aria-describedby="page-info"><span>页</span>
+              <button class="quiet" type="submit">跳转</button>
+            </form>
+          </div>
+        </div>
         <p class="corpus-note" id="corpus-note">古籍用字与版本可能有差异；简体匹配会统一常用繁简字。</p>
       </section>
     </div>
