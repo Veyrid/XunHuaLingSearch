@@ -102,7 +102,8 @@
       row.innerHTML=`<div class="couplet-text"><p class="poem-line ${Array.from(item.upper).length>7?'long':''}"><span class="line-tag">上</span>${highlighted(item.upper,'upper')}</p><p class="poem-line ${Array.from(item.lower).length>7?'long':''}"><span class="line-tag">下</span>${highlighted(item.lower,'lower')}</p></div><div class="poem-source"><p class="author"><span class="dynasty">${escape(p[2])}</span>${escape(p[1])}</p><button class="poem-title-button" title="查看全文与出处">《${escape(p[0])}》</button><p class="source-count">${item.sources.length>1?`${item.sources.length} 个出处 / 版本`:escape(p[3])}</p></div><button class="copy-button" aria-label="复制上下句 ${escape(item.upper)} ${escape(item.lower)}">复制</button>`;
       row.querySelector('.copy-button').onclick=()=>copy(item.upper+'，\n'+item.lower+'。');row.querySelector('.poem-title-button').onclick=()=>showPoem(item);$('results').append(row);
     }
-    const pages=Math.ceil(state.matches.length/PAGE_SIZE);$('pagination').hidden=false;$('page-info').textContent=`第 ${state.page} / ${fmt(pages)} 页 · 每页 ${PAGE_SIZE} 副`;$('prev-page').disabled=state.page===1;$('next-page').disabled=state.page===pages;$('page-number').max=String(pages);$('page-number').value=String(state.page);
+    const pages=Math.ceil(state.matches.length/PAGE_SIZE);$('pagination').hidden=false;$('page-info').textContent=`第 ${state.page} / ${fmt(pages)} 页 · 每页 ${PAGE_SIZE} 副`;$('prev-page').disabled=state.page===1;$('next-page').disabled=state.page===pages;
+    if($('page-number')){$('page-number').max=String(pages);$('page-number').value=String(state.page);}
   }
   function goToPage(value){
     const pages=Math.ceil(state.matches.length/PAGE_SIZE),page=Number(value);
@@ -144,7 +145,9 @@
     });
   }
   function reset(){for(const type of Object.values(fields))for(const id of Object.values(type))$(id).value='';state.dynasties=[];state.exact=[];state.misplaced=[];state.rounds=[];renderDynasties();renderRules('exact');renderRules('misplaced');renderRounds();setLength(5);}
-  $('filter-form').onsubmit=e=>{e.preventDefault();return search();};document.addEventListener('compositionstart',()=>{composing=true;state.revision++;clearTimeout(debounce);});document.addEventListener('compositionend',()=>{composing=false;schedule();});
+  $('filter-form').onsubmit=e=>{e.preventDefault();return search();};
+  $('filter-form').addEventListener('compositionstart',()=>{composing=true;state.revision++;clearTimeout(debounce);});
+  $('filter-form').addEventListener('compositionend',()=>{composing=false;schedule();});
   $('dynasty-all').onclick=()=>{state.dynasties=[];renderDynasties();schedule();};
   for(const type of Object.values(fields))for(const id of Object.values(type))$(id).oninput=schedule;
   for(const id of ['upper-length','lower-length'])$(id).oninput=()=>{state.lengths=['upper-length','lower-length'].map(id=>Number($(id).value)||NaN);schedule();};
@@ -154,7 +157,10 @@
   $('example-button').onclick=()=>{reset();$('required-chars').value='明月霜';state.exact=[{line:'upper',chars:'月',positions:'4'},{line:'lower',chars:'霜',positions:'5'}];state.misplaced=[{line:'upper',chars:'明',positions:'1,2'},{line:'lower',chars:'月',positions:'1,2,3,4,5'}];renderRules('exact');renderRules('misplaced');schedule();};
   $('guess-form').onsubmit=e=>{e.preventDefault();const upper=E.chars($('guess-upper').value),lower=E.chars($('guess-lower').value),ns=[Array.from(upper).length,Array.from(lower).length];if(ns.some(n=>n<1||n>40)){toast('请填写上下两句，每句 1 到 40 个汉字');return;}if(ns.some((n,i)=>state.lengths[i]&&n!==state.lengths[i])){toast('猜测的上下句字数需分别符合所选字数');return;}state.rounds.push({upper,lower,states:ns.map(n=>Array(n).fill(-1))});$('guess-upper').value='';$('guess-lower').value='';renderRounds();schedule();};
   $('prev-page').onclick=()=>{if(state.page>1)goToPage(state.page-1);};$('next-page').onclick=()=>{if(state.page*PAGE_SIZE<state.matches.length)goToPage(state.page+1);};
-  $('page-jump-form').onsubmit=e=>{e.preventDefault();goToPage($('page-number').value);};
+  // The unversioned script URL can still be requested by a cached older entry page.
+  if($('jump-page'))$('jump-page').onclick=()=>goToPage($('page-number').value);
+  if($('page-jump-form'))$('page-jump-form').onsubmit=e=>{e.preventDefault();goToPage($('page-number').value);};
+  if($('page-number'))$('page-number').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();goToPage(e.target.value);}};
   document.querySelectorAll('[data-close-dialog]').forEach(b=>b.onclick=()=>{detailRevision++;b.closest('dialog').close();});$('about-button').onclick=()=>$('about-dialog').showModal();
   if(manifest?.format===3){
     $('footer-stats').textContent=`${fmt(manifest.poems)} 首作品 · ${fmt(manifest.strictPairs)} 条严格配对来源记录`;

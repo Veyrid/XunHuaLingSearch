@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
+const versionAssets = require('./version-assets.cjs');
 const root = path.resolve(__dirname, '../dist');
 const files = new Map();
 function walk(directory, prefix = '') {
@@ -30,6 +31,7 @@ for (const file of ['index.html','couplets.js']) {
   const source = fs.readFileSync(path.join(root,file),'utf8');
   for (const match of source.matchAll(/(?:src|href)="([^"$]+)"/g)) checkReference(match[1],file);
 }
+versionAssets({root, check:true});
 const manifest = JSON.parse(fs.readFileSync(path.join(root,'data/manifest.json'),'utf8'));
 const chunks = [...manifest.chunks,...manifest.bodyChunks];
 assert.equal(new Set(chunks.map(c=>c.file)).size,chunks.length,'分块文件名不能重复');

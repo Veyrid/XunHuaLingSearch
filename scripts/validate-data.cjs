@@ -62,5 +62,5 @@ assert.equal(pairs,m.pairs);assert.equal(strictPairs,m.strictPairs);assert.deepE
 assert.equal(nineteen.size,19);assert.equal(peacockStrict.size,173);
 assert.deepEqual([...dynastyLabels].sort(),[...m.dynastyLabels].sort());
 for(const c of cases){assert.ok(c.adjacent>0,`Missing from corpus: ${c.upper}/${c.lower}`);assert.equal(c.strict>0,c.expectedStrict,`Strict mismatch: ${c.upper}/${c.lower} (${c.strict})`);}
-const html=fs.readFileSync(path.join(root,'index.html'),'utf8');for(const match of html.matchAll(/(?:src|href)="([^"#]+)"/g))if(!/^(?:https?:|data:)/.test(match[1]))assert.ok(fs.existsSync(path.join(root,match[1])),match[1]);
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');for(const match of html.matchAll(/(?:src|href)="([^"#]+)"/g))if(!/^(?:https?:|data:)/.test(match[1]))assert.ok(fs.existsSync(path.join(root,match[1].split(/[?#]/)[0])),match[1]);
 console.log(JSON.stringify({valid:true,poems:bodyCount,pairs,strictPairs,chunks:m.chunks.length,bodyChunks:m.bodyChunks.length,cases,deduplicatedExample:[...example.values()].map(x=>({upper:x.upper,lower:x.lower,sources:x.sources.length}))},null,2));

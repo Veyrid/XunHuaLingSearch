@@ -7,13 +7,13 @@
   <meta name="color-scheme" content="light">
   <title>寻花令 · 诗词检索</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231e3447'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-size='43' fill='white' font-family='serif'%3E寻%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="data/manifest.js"></script>
-  <script defer src="vendor/opencc.js"></script>
-  <script defer src="engine.js"></script>
-  <script defer src="dynasties.js"></script>
-  <script defer src="search.js"></script>
-  <script defer src="couplets.js"></script>
+  <link rel="stylesheet" href="styles.css?v=3d6980cd3839">
+  <script defer src="data/manifest.js?v=607f43034567"></script>
+  <script defer src="vendor/opencc.js?v=5009384a6bdc"></script>
+  <script defer src="engine.js?v=c15d5653c14c"></script>
+  <script defer src="dynasties.js?v=a562d9b613ab"></script>
+  <script defer src="search.js?v=b6e46b673d51"></script>
+  <script defer src="couplets.js?v=87dfe94d806a"></script>
 </head>
 <body>
   <header class="site-header">
@@ -91,10 +91,10 @@
           <div class="pagination-controls">
             <button id="prev-page" class="quiet" type="button">上一页</button>
             <button id="next-page" class="quiet" type="button">下一页</button>
-            <form id="page-jump-form" class="page-jump" novalidate>
+            <div class="page-jump" role="group" aria-label="页码跳转">
               <label for="page-number">跳至</label><input id="page-number" type="number" min="1" step="1" inputmode="numeric" aria-label="跳转页码" aria-describedby="page-info"><span>页</span>
-              <button class="quiet" type="submit">跳转</button>
-            </form>
+              <button id="jump-page" class="quiet" type="button">跳转</button>
+            </div>
           </div>
         </div>
         <p class="corpus-note" id="corpus-note">古籍用字与版本可能有差异；简体匹配会统一常用繁简字。</p>
