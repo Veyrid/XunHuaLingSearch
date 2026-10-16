@@ -39,7 +39,7 @@
     const fixed=kind==='exact',holder=$(fixed?'exact-rules':'misplaced-rules');holder.replaceChildren();
     state[kind].forEach((r,i)=>{
       const label=(fixed?'定位':'排位')+'条件 '+(i+1),row=document.createElement('div');row.className='rule-row';
-      row.innerHTML=`<select aria-label="${label} 所属句"><option value="upper" ${r.line==='upper'?'selected':''}>上句</option><option value="lower" ${r.line==='lower'?'selected':''}>下句</option></select><input aria-label="${label} 的字" placeholder="${fixed?'字，如 月':'字，如 明月'}" value="${escape(r.chars)}" autocomplete="off"><input aria-label="${label} 的位置" placeholder="${fixed?'位，如 3':'位，如 1,3'}" value="${escape(r.positions)}" inputmode="numeric"><button type="button" class="icon-button" aria-label="删除${label}">×</button>`;
+      row.innerHTML=`<select aria-label="${label} 所属句"><option value="upper" ${r.line==='upper'?'selected':''}>上句</option><option value="lower" ${r.line==='lower'?'selected':''}>下句</option></select><input aria-label="${label} 的字" placeholder="${fixed?'字，如 月':'字，如 明月'}" value="${escape(r.chars)}" autocomplete="off"><input type="text" aria-label="${label} 的位置" placeholder="位，如 1,3" value="${escape(r.positions)}" inputmode="text" autocomplete="off" spellcheck="false"><button type="button" class="icon-button" aria-label="删除${label}">×</button>`;
       row.querySelector('select').onchange=e=>{r.line=e.target.value;schedule();};const inputs=row.querySelectorAll('input');inputs[0].oninput=e=>{r.chars=e.target.value;schedule();};inputs[1].oninput=e=>{r.positions=e.target.value;schedule();};row.querySelector('button').onclick=()=>{state[kind].splice(i,1);renderRules(kind);schedule();};holder.append(row);
     });
   }
