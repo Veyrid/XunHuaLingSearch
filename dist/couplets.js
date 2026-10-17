@@ -4,7 +4,7 @@
   const simplify=window.OpenCC?window.OpenCC.Converter({from:'t',to:'cn'}):s=>s;
   const state={lengths:[5,5],dynasties:[],exact:[],misplaced:[],rounds:[],page:1,matches:[],compiled:null,revision:0};
   const cache=new Map(),pending=new Map(),PAGE_SIZE=20,CACHE_LIMIT=24;
-  let debounce,toastTimer,composing=false,detailRevision=0;
+  let debounce,toastTimer,composing=false,detailRevision=0,resultRevision=0;
   const fmt=n=>n.toLocaleString('zh-CN'),escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const names={all:'整副',upper:'上句',lower:'下句'};
   const fields={required:{all:'required-chars',upper:'upper-required',lower:'lower-required'},excluded:{all:'excluded-chars',upper:'upper-excluded',lower:'lower-excluded'}};
@@ -53,7 +53,7 @@
   function prepareSearch(){
     const query=readInput(),compiled=E.compile(query);state.matches=[];state.page=1;renderChips(query,compiled);$('notice').hidden=true;$('result-count').textContent='—';$('search-button').disabled=false;$('search-button').textContent='开始检索';
     if(compiled.errors.length){$('notice').textContent=compiled.errors.join(' ');$('notice').hidden=false;$('results-description').textContent='请调整冲突或未填完整的条件';empty('条件需要调整','修改条件后，点击“开始检索”。');return;}
-    if(!manifest||manifest.format!==3){$('results-description').textContent='词库尚未就绪';empty('上下句词库尚未就绪','请保留完整文件夹，词库更新后刷新本页。');return;}
+    if(!manifest||![3,4].includes(manifest.format)){$('results-description').textContent='词库尚未就绪';empty('上下句词库尚未就绪','请保留完整文件夹，词库更新后刷新本页。');return;}
     const chunks=window.PoetrySearch.selectChunks(manifest,compiled,new Set(query.dynasties),query.pairingMode);
     $('results-description').textContent=`当前范围涉及 ${fmt(chunks.length)} 个检索分块；点击后按需读取，已有候选可复用时会直接筛选。`;
     empty('设定条件，开始寻诗','可先选择朝代，再填写已知的字、位置或游戏反馈。修改条件后需再次点击“开始检索”。');
@@ -71,12 +71,12 @@
     for(const kind of ['exact','misplaced'])for(const r of query[kind])if(r.chars&&r.positions)chips.push([`${names[r.line]} ${r.chars} ${kind==='exact'?'在':'不在'} ${r.positions}`,kind==='exact'?'green':'yellow']);
     if(compiled.rounds.length)chips.push([`${compiled.rounds.length} 轮整副反馈`,'']);$('active-filters').innerHTML=chips.map(([text,c])=>`<span class="filter-chip ${c}">${escape(text)}</span>`).join('');
   }
-  function empty(title,text){$('results').innerHTML=`<div class="empty-state"><div class="empty-symbol" aria-hidden="true">寻</div><h3>${escape(title)}</h3><p>${escape(text)}</p></div>`;$('pagination').hidden=true;}
+  function empty(title,text){resultRevision++;$('results').innerHTML=`<div class="empty-state"><div class="empty-symbol" aria-hidden="true">寻</div><h3>${escape(title)}</h3><p>${escape(text)}</p></div>`;$('pagination').hidden=true;}
   async function search(){
     clearTimeout(debounce);if(composing)return;
     const revision=++state.revision,query=readInput(),compiled=E.compile(query);state.compiled=compiled;state.page=1;state.matches=[];renderChips(query,compiled);$('notice').hidden=true;
     if(compiled.errors.length){prepareSearch();return;}
-    if(!manifest||manifest.format!==3){$('result-count').textContent='—';empty('上下句词库尚未就绪','请保留完整文件夹，词库更新后刷新本页。');return;}
+    if(!manifest||![3,4].includes(manifest.format)){$('result-count').textContent='—';empty('上下句词库尚未就绪','请保留完整文件夹，词库更新后刷新本页。');return;}
     const original=$('script-mode').value==='original',started=performance.now();
     $('search-button').disabled=true;$('search-button').textContent='正在检索…';$('result-count').textContent='…';$('results-description').textContent='正在筛选上下句并合并相同结果…';empty('正在检索','首次需读取相应词库，耗时取决于所选范围与网络或本地文件速度。');
     try{
@@ -96,14 +96,24 @@
   }
   function renderResults(){
     if(!state.matches.length){empty('暂时没有匹配的上下句','可逐条放宽条件，或切换简体 / 原文。词库不等同于游戏题库。');if($('pairing-mode').value==='strict'){const b=document.createElement('button');b.className='quiet broaden-button';b.textContent='保留条件，试试所有相邻句';b.onclick=()=>{$('pairing-mode').value='adjacent';pairingChanged();search();};$('results').querySelector('.empty-state').append(b);}return;}
-    const start=(state.page-1)*PAGE_SIZE;$('results').replaceChildren();
-    for(const item of state.matches.slice(start,start+PAGE_SIZE)){
-      const p=item.sources[0],row=document.createElement('article');row.className='result-row';
-      row.innerHTML=`<div class="couplet-text"><p class="poem-line ${Array.from(item.upper).length>7?'long':''}"><span class="line-tag">上</span>${highlighted(item.upper,'upper')}</p><p class="poem-line ${Array.from(item.lower).length>7?'long':''}"><span class="line-tag">下</span>${highlighted(item.lower,'lower')}</p></div><div class="poem-source"><p class="author"><span class="dynasty">${escape(p[2])}</span>${escape(p[1])}</p><button class="poem-title-button" title="查看全文与出处">《${escape(p[0])}》</button><p class="source-count">${item.sources.length>1?`${item.sources.length} 个出处 / 版本`:escape(p[3])}</p></div><button class="copy-button" aria-label="复制上下句 ${escape(item.upper)} ${escape(item.lower)}">复制</button>`;
-      row.querySelector('.copy-button').onclick=()=>copy(item.upper+'，\n'+item.lower+'。');row.querySelector('.poem-title-button').onclick=()=>showPoem(item);$('results').append(row);
+    const start=(state.page-1)*PAGE_SIZE,items=state.matches.slice(start,start+PAGE_SIZE),revision=++resultRevision,queryRevision=state.revision;
+    const current=()=>revision===resultRevision&&queryRevision===state.revision,rows=[];$('results').replaceChildren();
+    function paint(row,item,p){
+      row.innerHTML=`<div class="couplet-text"><p class="poem-line ${Array.from(item.upper).length>7?'long':''}"><span class="line-tag">上</span>${highlighted(item.upper,'upper')}</p><p class="poem-line ${Array.from(item.lower).length>7?'long':''}"><span class="line-tag">下</span>${highlighted(item.lower,'lower')}</p></div><div class="poem-source"><p class="author"><span class="dynasty">${escape(p[2])}</span>${escape(p[1])}</p><button class="poem-title-button" title="查看全文与出处">${p[0]===null?'正在读取出处…':`《${escape(p[0])}》`}</button><p class="source-count">${item.sources.length>1?`${item.sources.length} 个出处 / 版本`:escape(p[3])}</p></div><button class="copy-button" aria-label="复制上下句 ${escape(item.upper)} ${escape(item.lower)}">复制</button>`;
+      row.querySelector('.copy-button').onclick=()=>copy(item.upper+'，\n'+item.lower+'。');row.querySelector('.poem-title-button').onclick=()=>showPoem(item);
     }
+    for(const item of items){const row=document.createElement('article');row.className='result-row';paint(row,item,item.sources[0]);rows.push(row);$('results').append(row);}
     const pages=Math.ceil(state.matches.length/PAGE_SIZE);$('pagination').hidden=false;$('page-info').textContent=`第 ${state.page} / ${fmt(pages)} 页 · 每页 ${PAGE_SIZE} 副`;$('prev-page').disabled=state.page===1;$('next-page').disabled=state.page===pages;
     if($('page-number')){$('page-number').max=String(pages);$('page-number').value=String(state.page);}
+    if(items.some(item=>item.sources[0][0]===null)){
+      searcher.resolvePoems(items.map(item=>item.sources[0]),{isCurrent:current}).then(poems=>{
+        if(!poems||!current())return;
+        poems.forEach((p,i)=>{items[i].sources[0]=p;paint(rows[i],items[i],p);});
+      }).catch(()=>{
+        if(!current())return;
+        rows.forEach((row,i)=>{if(items[i].sources[0][0]!==null)return;const button=row.querySelector('.poem-title-button');button.textContent='出处读取失败，点击重试';button.onclick=()=>renderResults();});
+      });
+    }
   }
   function goToPage(value){
     const pages=Math.ceil(state.matches.length/PAGE_SIZE),page=Number(value);
@@ -112,13 +122,24 @@
     state.page=page;renderResults();$('results-heading').scrollIntoView({block:'start'});
   }
   async function copy(text){try{await navigator.clipboard.writeText(text);toast('上下句已复制');}catch{const a=document.createElement('textarea');a.value=text;a.style.position='fixed';a.style.opacity='0';document.body.append(a);a.select();const ok=document.execCommand('copy');a.remove();toast(ok?'上下句已复制':'请选中诗句手动复制');}}
-  function showPoem(item){
-    const holder=$('poem-content');holder.replaceChildren();const picker=document.createElement('div');picker.className='source-picker';const body=document.createElement('div');holder.append(picker,body);
+  async function showPoem(item){
+    const opening=++detailRevision,holder=$('poem-content');holder.replaceChildren();const picker=document.createElement('div');picker.className='source-picker';const body=document.createElement('div');holder.append(picker,body);
+    $('poem-title').textContent=item.sources[0][0]||'诗词全文';body.textContent='正在读取出处…';if(!$('poem-dialog').open)$('poem-dialog').showModal();
+    try{
+      if(item.sources.some(p=>p[0]===null)){
+        const poems=await searcher.resolvePoems(item.sources,{isCurrent:()=>opening===detailRevision});
+        if(!poems||opening!==detailRevision)return;item.sources=poems;
+      }
+    }catch{
+      if(opening!==detailRevision)return;
+      body.textContent='出处读取失败，请检查网络连接或离线版 data 文件夹。';const retry=document.createElement('button');retry.className='quiet';retry.textContent='重试';retry.onclick=()=>showPoem(item);body.append(retry);return;
+    }
+    if(opening!==detailRevision)return;
     async function choose(p,index){
       const revision=++detailRevision;$('poem-title').textContent=p[0];Array.from(picker.children).forEach((b,i)=>b.classList.toggle('selected',i===index));body.innerHTML='<p class="muted">正在读取全文…</p>';
-      try{const data=await load(p[5]);if(revision!==detailRevision)return;const raw=data.records[p[6]],text=$('script-mode').value==='original'?(raw[1]||raw[0]):raw[0];const html=highlightBody(text,item),editorial=p[7]?`<p class="muted">${escape(p[7])}${/^https:\/\//.test(p[8]||'')?` <a href="${escape(p[8])}" target="_blank" rel="noopener noreferrer">核对来源</a>`:''}</p>`:'';body.innerHTML=`<p class="muted">${escape(p[2])} · ${escape(p[1])} / ${escape(p[3])}</p><div class="poem-body">${html}</div>${editorial}<p class="muted">古籍版本与分行可能不同。配对依据原文结构推断，词与古体诗请结合全文核对。</p>`;}catch{body.textContent='全文读取失败，请检查网络连接或离线版 data 文件夹。';}
+      try{const data=await load(p[5]);if(revision!==detailRevision)return;const raw=data.records[p[6]],text=$('script-mode').value==='original'?(raw[1]||raw[0]):raw[0];const html=highlightBody(text,item),editorial=p[7]?`<p class="muted">${escape(p[7])}${/^https:\/\//.test(p[8]||'')?` <a href="${escape(p[8])}" target="_blank" rel="noopener noreferrer">核对来源</a>`:''}</p>`:'';body.innerHTML=`<p class="muted">${escape(p[2])} · ${escape(p[1])} / ${escape(p[3])}</p><div class="poem-body">${html}</div>${editorial}<p class="muted">古籍版本与分行可能不同。配对依据原文结构推断，词与古体诗请结合全文核对。</p>`;}catch{if(revision===detailRevision)body.textContent='全文读取失败，请检查网络连接或离线版 data 文件夹。';}
     }
-    item.sources.forEach((p,i)=>{const b=document.createElement('button');b.textContent=`${i+1}. ${p[1]} · ${p[3]}`;b.onclick=()=>choose(p,i);picker.append(b);});choose(item.sources[0],0);$('poem-dialog').showModal();
+    item.sources.forEach((p,i)=>{const b=document.createElement('button');b.textContent=`${i+1}. ${p[1]} · ${p[3]}`;b.onclick=()=>choose(p,i);picker.append(b);});choose(item.sources[0],0);
   }
   function highlightBody(text,item){
     // Keep source punctuation visible, including the dunhao inside a lyric line.
@@ -162,7 +183,8 @@
   if($('page-jump-form'))$('page-jump-form').onsubmit=e=>{e.preventDefault();goToPage($('page-number').value);};
   if($('page-number'))$('page-number').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229){e.preventDefault();goToPage(e.target.value);}};
   document.querySelectorAll('[data-close-dialog]').forEach(b=>b.onclick=()=>{detailRevision++;b.closest('dialog').close();});$('about-button').onclick=()=>$('about-dialog').showModal();
-  if(manifest?.format===3){
+  $('poem-dialog').addEventListener('cancel',()=>{detailRevision++;});
+  if([3,4].includes(manifest?.format)){
     $('footer-stats').textContent=`${fmt(manifest.poems)} 首作品 · ${fmt(manifest.strictPairs)} 条严格配对来源记录`;
     $('about-content').innerHTML=`
       <h3>开始检索</h3><p>先选择上下句字数和朝代，再填写已知的字、位置或游戏反馈，点击“开始检索”。修改条件后需再次点击；所有条件同时生效。五言为上下句各 5 字，每句位置独立从 1 开始。</p>
@@ -170,7 +192,7 @@
       <h3>游戏反馈</h3><p>上下两句全部标完后，整轮才参与筛选。默认按整副次数处理重复字：先分配绿色，再按上句到下句、从左到右分配黄色。灰色可能表示额外猜测次数用尽。游戏若只判断字是否存在，可选择“逐字判断”。</p>
       <h3>查看结果</h3><p>结果按朝代大致由早到晚排序，每页 20 副。可点击上一页、下一页，或输入页码后点击“跳转”或按回车。相同上下句合并显示；点击题名可查看全文及各个出处，也可一键复制。</p><p>朝代可多选；“明末清初”等过渡标签归入相关朝代，显示时保留来源标签。并存朝代采用固定的大致顺序，不代表作品的确切创作年份。</p>
       <h3>配对与用字</h3><p>默认严格配对，依据原文结构组成上下句。找不到时可试宽松模式，但相邻句可能跨联。顿号不单独拆句，如“念去去、千里烟波”按 7 字句检索。词和古体诗可能有不同断句，请结合全文核对。</p><p>简体模式统一词库与输入的常用繁简字；原文模式保留来源用字。按当前文字模式合并相同上下句，古籍版本与异体字差异仍可能影响匹配。</p>
-      <h3>在线与离线使用</h3><p>在线版需先下载相关词库，再在浏览器内筛选。选择朝代可减少下载量；首次检索只填写字或位置，仍需读取相应字数范围的词库。打开页面和编辑条件不会自动下载大词库，全文在点击题名后读取。</p><p>完整下载并解压项目后，可双击 index.html 离线使用。查询条件和反馈不提交到应用服务器；在线版向本站请求静态文件。</p>
+      <h3>在线与离线使用</h3><p>在线版需先下载相关词库，再在浏览器内筛选。默认仅读取严格配对的简体诗句；切换原文或宽松模式时，再读取相应补充数据。结果只加载当前页的作者与题名，点击题名后读取其他出处和全文。选择朝代可减少下载量；首次检索只填写字或位置，仍需读取相应字数范围的词库。打开页面和编辑条件不会自动下载大词库。</p><p>完整下载并解压项目后，可双击 index.html 离线使用。查询条件和反馈不提交到应用服务器；在线版向本站请求静态文件。</p>
       <h3>词库与许可</h3><p>${fmt(manifest.poems)} 首可配对作品，${fmt(manifest.strictPairs)} 条严格配对来源记录，宽松模式共 ${fmt(manifest.pairs)} 条。检索结果会去重，并非游戏官方题库。</p><p>诗词数据来自 <a href="https://github.com/chinese-poetry/chinese-poetry" target="_blank" rel="noopener noreferrer">chinese-poetry</a>（<a href="data/LICENSE-chinese-poetry.txt" target="_blank">MIT</a>）与 <a href="https://github.com/Werneror/Poetry" target="_blank" rel="noopener noreferrer">Werneror/Poetry</a>（<a href="data/LICENSE-werneror-poetry.txt" target="_blank">MIT</a>）。收录范围、版本和作品整理见 <a href="数据来源.md" target="_blank">数据来源</a>。</p><p>简繁转换使用 OpenCC-js（<a href="vendor/LICENSE-opencc-js.txt" target="_blank">MIT</a>），附有 <a href="vendor/THIRD_PARTY_LICENSES.md" target="_blank">第三方许可说明</a>及 <a href="vendor/LICENSES/Apache-2.0.txt" target="_blank">Apache 2.0 全文</a>。项目自身未设置开源许可证。</p>`;
   }
   if(document.modelContext?.registerTool){

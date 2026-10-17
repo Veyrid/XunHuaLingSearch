@@ -2,8 +2,9 @@
 const fs=require('node:fs'),path=require('node:path'),readline=require('node:readline');
 const simplify=require('opencc-js').Converter({from:'t',to:'cn'});
 const {buildPairs,clean,REASON_LABELS}=require('./pairing.cjs');
+const {packData,verifyPacking,installData}=require('./packed-data.cjs');
 const D=require('../dist/dynasties.js');
-const root=path.resolve(__dirname,'..'),source=path.resolve(process.argv[2]||path.join(root,'.cache/chinese-poetry-master')),output=path.join(root,'dist/data');
+const root=path.resolve(__dirname,'..'),source=path.resolve(process.argv[2]||path.join(root,'.cache/chinese-poetry-master')),output=path.join(root,'.cache/unpacked-data');
 const preparedFile=path.join(root,'.cache/prepared-data.json'),supplement=path.join(root,'.cache/werneror-poetry/records.jsonl');
 if(!fs.existsSync(preparedFile)||!fs.existsSync(supplement)||!fs.existsSync(path.join(source,'LICENSE')))throw new Error('构建缓存未准备。请先运行 python scripts/prepare-data.py --download；普通打开网页不需要重建。');
 const prepared=JSON.parse(fs.readFileSync(preparedFile,'utf8'));
@@ -40,6 +41,12 @@ manifest.searchIndex=1;manifest.dynastyLabels=[...new Set(chunks.flatMap(c=>c.dy
 fs.writeFileSync(path.join(output,'manifest.js'),'window.POETRY_MANIFEST='+JSON.stringify(manifest)+';\n');fs.writeFileSync(path.join(output,'manifest.json'),JSON.stringify(manifest,null,2));fs.copyFileSync(path.join(source,'LICENSE'),path.join(output,'LICENSE-chinese-poetry.txt'));
 fs.copyFileSync(path.join(root,'.cache/werneror-poetry/LICENSE'),path.join(output,'LICENSE-werneror-poetry.txt'));
 fs.mkdirSync(path.join(root,'dist/vendor'),{recursive:true});for(const [from,to] of [['dist/umd/t2cn.js','opencc.js'],['LICENSE','LICENSE-opencc-js.txt'],['THIRD_PARTY_LICENSES.md','THIRD_PARTY_LICENSES.md']])fs.copyFileSync(path.join(root,'node_modules/opencc-js',from),path.join(root,'dist/vendor',to));fs.cpSync(path.join(root,'node_modules/opencc-js/LICENSES'),path.join(root,'dist/vendor/LICENSES'),{recursive:true});
-console.log(JSON.stringify({poems:poemCount,pairs:pairCount,strictPairs:strictCount,chunks:chunks.length,bodyChunks:bodyChunks.length,collections,strictReasons,skipped},null,2));
+const staging=fs.mkdtempSync(path.join(root,'.cache/packed-'));
+const compact=packData(output,staging);const verification=verifyPacking(output,staging);installData(staging,path.join(root,'dist/data'));
+for(const directory of [output,staging]){
+  const absolute=path.resolve(directory);if(path.dirname(absolute)!==path.join(root,'.cache')||!(path.basename(absolute)==='unpacked-data'||path.basename(absolute).startsWith('packed-')))throw Error('Unexpected build directory');
+  fs.rmSync(absolute,{recursive:true});
+}
+console.log(JSON.stringify({poems:poemCount,pairs:pairCount,strictPairs:strictCount,chunks:compact.chunks.length,metadataChunks:compact.metadataChunks.length,bodyChunks:bodyChunks.length,collections,strictReasons,skipped,verification},null,2));
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

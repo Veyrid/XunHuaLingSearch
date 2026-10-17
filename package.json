@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "test": "node --test tests/search.test.cjs tests/pairing.test.cjs tests/catalog.test.cjs tests/ui.test.cjs",
+    "test": "node --test tests/search.test.cjs tests/pairing.test.cjs tests/catalog.test.cjs tests/ui.test.cjs tests/packed-data.test.cjs",
     "pages:check": "node scripts/check-pages.cjs",
     "data:build": "node scripts/build-data.cjs",
     "preview": "node scripts/preview.cjs"

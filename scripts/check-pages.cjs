@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const versionAssets = require('./version-assets.cjs');
+const {dataFiles} = require('./packed-data.cjs');
 const root = path.resolve(__dirname, '../dist');
 const files = new Map();
 function walk(directory, prefix = '') {
@@ -33,9 +34,9 @@ for (const file of ['index.html','couplets.js']) {
 }
 versionAssets({root, check:true});
 const manifest = JSON.parse(fs.readFileSync(path.join(root,'data/manifest.json'),'utf8'));
-const chunks = [...manifest.chunks,...manifest.bodyChunks];
+const chunks = [...manifest.chunks,...manifest.bodyChunks,...(manifest.metadataChunks||[]),...manifest.chunks.flatMap(c=>[c.originalFile,c.evidenceFile].filter(Boolean).map(file=>({file})))];
 assert.equal(new Set(chunks.map(c=>c.file)).size,chunks.length,'分块文件名不能重复');
 for (const chunk of chunks) { assert.equal(path.posix.basename(chunk.file),chunk.file); assert.ok(files.has('data/'+chunk.file),`缺少词库：${chunk.file}`); }
-const expectedData = new Set(['manifest.js','manifest.json','LICENSE-chinese-poetry.txt','LICENSE-werneror-poetry.txt',...chunks.map(c=>c.file)]);
+const expectedData = new Set(['manifest.js','manifest.json','LICENSE-chinese-poetry.txt','LICENSE-werneror-poetry.txt',...dataFiles(manifest)]);
 for (const file of files.keys()) if(file.startsWith('data/')) assert.ok(expectedData.has(file.slice(5)),`发布目录存在未使用的数据：${file}`);
 console.log(`Pages 检查通过：${files.size} 个文件，${size.toLocaleString('en-US')} 字节（${(size/1_000_000).toFixed(1)} MB），发布目录 dist。`);

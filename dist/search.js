@@ -16,6 +16,42 @@
 
   function createSearcher({manifest,load,reuseLimit=75000,sourceLimit=150000}){
     let previous=null;
+    async function resolvePoems(poems,{isCurrent=()=>true}={}){
+      const output=[...poems],requests=new Map();
+      for(const [index,p]of poems.entries()){
+        if(p[0]!==null)continue;
+        const id=p[4],chunk=manifest.metadataChunks?.[Math.floor(id/manifest.metadataChunkSize)];
+        if(!chunk||id<chunk.firstId||id>=chunk.firstId+chunk.poems)throw Error('作品出处索引不完整');
+        if(!requests.has(chunk.file))requests.set(chunk.file,{chunk,items:[]});
+        requests.get(chunk.file).items.push({index,id});
+      }
+      const groups=[...requests.values()];
+      for(let start=0;start<groups.length;start+=3){
+        if(!isCurrent())return null;
+        await Promise.all(groups.slice(start,start+3).map(async({chunk,items})=>{
+          const data=await load(chunk.file);
+          for(const {index,id}of items){
+            const p=data.poems?.[id-chunk.firstId];
+            if(!p||p[4]!==id||p[2]!==poems[index][2])throw Error('作品出处数据不完整');
+            output[index]=p;
+          }
+        }));
+      }
+      return isCurrent()?output:null;
+    }
+    async function readChunk(chunk,original){
+      if(manifest.format!==4)return {data:await load(chunk.file)};
+      const [raw,extra]=await Promise.all([load(chunk.file),original&&chunk.originalFile?load(chunk.originalFile):null]);
+      if(original&&chunk.originalFile&&!extra)throw Error('原文异文数据不完整');
+      if(raw.pairs?.length!==chunk.pairs||!Array.isArray(raw.poems))throw Error('检索数据不完整');
+      const data={poems:raw.poems.map(([id,era])=>[null,null,manifest.dynastyLabels[era],null,id]),pairs:raw.pairs};
+      let variants;
+      if(extra){
+        if(extra.variants?.length!==chunk.originalPairs)throw Error('原文异文数据不完整');
+        variants=new Map(extra.variants.map(([index,u,l])=>[index,[u,l]]));
+      }
+      return {data,variants};
+    }
     async function run(query,{original=false,isCurrent=()=>true,onProgress=()=>{},compiled=E.compile(query)}={}){
       if(compiled.errors.length)throw new Error(compiled.errors.join(' '));
       if(!Array.isArray(query.dynasties||[])||(query.dynasties||[]).some(d=>!D.options.includes(d)))throw new Error('朝代筛选格式不正确');
@@ -48,15 +84,16 @@
           if(!isCurrent())return null;
           const batch=chunks.slice(start,start+3);
           stats.cachedChunks+=batch.filter(c=>load.has?.(c.file)).length;
-          const loaded=await Promise.all(batch.map(c=>load(c.file)));
+          const loaded=await Promise.all(batch.map(c=>readChunk(c,original)));
           if(!isCurrent())return null;
           for(let j=0;j<batch.length;j++){
-            const data=loaded[j],allowed=data.poems.map(p=>D.accepts(p[2],selected));
+            const {data,variants}=loaded[j],allowed=data.poems.map(p=>D.accepts(p[2],selected));
             for(let i=0;i<data.pairs.length;i++){
               if(i%2048===0&&!await checkpoint())return null;
               const pair=data.pairs[i];
-              if(!allowed[pair[2]]||!E.allowsPair(pair,pairingMode))continue;
-              const upper=original?(pair[3]||pair[0]):pair[0],lower=original?(pair[4]||pair[1]):pair[1];
+              if(!allowed[pair[2]]||(manifest.format!==4&&!E.allowsPair(pair,pairingMode)))continue;
+              const variant=manifest.format===4?variants?.get(i):[pair[3],pair[4]];
+              const upper=original?(variant?.[0]||pair[0]):pair[0],lower=original?(variant?.[1]||pair[1]):pair[1];
               stats.checked++;
               if(compiled.matches(upper,lower))E.addCandidate(matches,upper,lower,data.poems[pair[2]]);
             }
@@ -76,7 +113,7 @@
       previous=sources<=sourceLimit?{compiled,selected,pairingMode,original,items}:null;
       return {items,stats};
     }
-    return {run};
+    return {run,resolvePoems};
   }
   const api={selectChunks,createSearcher};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;

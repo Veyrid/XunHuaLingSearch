@@ -1,8 +1,21 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict'),E=require('../dist/engine.js'),D=require('../dist/dynasties.js');
+const {readData,expandChunk}=require('./packed-data.cjs');
 const root=path.resolve(__dirname,'../dist');for(const f of ['couplets.js','engine.js','dynasties.js','search.js','data/manifest.js','vendor/opencc.js'])new vm.Script(fs.readFileSync(path.join(root,f),'utf8'));
-const m=JSON.parse(fs.readFileSync(path.join(root,'data/manifest.json'),'utf8')),bodySizes=new Map(m.bodyChunks.map(c=>[c.file,c.poems])),example=new Map();let pairs=0,strictPairs=0,bodyCount=0;
-assert.equal(m.format,3);
-assert.equal(m.searchIndex,1);
+const directory=path.resolve(process.argv[2]||path.join(root,'data'));
+const m=JSON.parse(fs.readFileSync(path.join(directory,'manifest.json'),'utf8')),bodySizes=new Map(m.bodyChunks.map(c=>[c.file,c.poems])),example=new Map();let pairs=0,strictPairs=0,bodyCount=0;
+assert.ok([3,4].includes(m.format));
+assert.equal(m.searchIndex,m.format===4?2:1);
+const metadata=Array(m.poems);
+if(m.format===4){
+  assert.ok(Number.isInteger(m.metadataChunkSize)&&m.metadataChunkSize>0);
+  for(const [index,c]of m.metadataChunks.entries()){
+    assert.equal(c.firstId,index*m.metadataChunkSize);
+    const data=readData(directory,c.file);assert.equal(data.poems.length,c.poems);
+    assert.equal(c.poems,Math.min(m.metadataChunkSize,m.poems-c.firstId));
+    data.poems.forEach((p,i)=>{assert.equal(p[4],c.firstId+i);metadata[p[4]]=p;});
+  }
+  for(let id=0;id<m.poems;id++)assert.equal(metadata[id]?.[4],id);
+}
 const dynastyLabels=new Set();
 const cases=[
   ['千树万树梨花开','散入珠帘湿罗幕',false],
@@ -36,10 +49,11 @@ const cases=[
   ['天似穹庐','笼盖四野',true]
 ].map(([upper,lower,expectedStrict])=>({upper,lower,expectedStrict,strict:0,adjacent:0}));
 const byKey=new Map(cases.map(c=>[JSON.stringify([c.upper,c.lower]),c])),reasonCounts={},nineteen=new Set(),peacockStrict=new Set();
-function read(file){let received;vm.runInNewContext(fs.readFileSync(path.join(root,'data',file),'utf8'),{window:{POETRY_REGISTER(name,data){assert.equal(name,file);received=data;}}});assert.ok(received);return received;}
+function read(file){return readData(directory,file);}
 for(const chunk of m.bodyChunks){const data=read(chunk.file);assert.equal(data.records.length,chunk.poems);bodyCount+=data.records.length;}
 for(const chunk of m.chunks){
-  const data=read(chunk.file);assert.equal(data.pairs.length,chunk.pairs);let localStrict=0;
+  const data=expandChunk(directory,m,chunk);assert.equal(data.pairs.length,chunk.pairs);let localStrict=0;
+  if(m.format===4)data.poems=data.poems.map(p=>{const full=metadata[p[4]];assert.equal(p[2],full[2]);return full;});
   const summary=D.summarize(data);assert.deepEqual(chunk.dynasties,summary.dynasties);assert.deepEqual(chunk.strictDynasties,summary.strictDynasties);
   for(const label of summary.dynasties){dynastyLabels.add(label);assert.notEqual(D.describe(label).groups[0],'其他',`Unmapped dynasty: ${label}`);}
   for(const poem of data.poems){
